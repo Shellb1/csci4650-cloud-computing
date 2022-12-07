@@ -1,39 +1,32 @@
-var port = process.env.PORT || 3000,
-    http = require('http'),
-    fs = require('fs'),
-    html = fs.readFileSync('index.html');
+const express = require('express');
+const app = express();
+const mysql = require('mysql');
+const path = require('path');
 
-var log = function(entry) {
-    fs.appendFileSync('/tmp/sample-app.log', new Date().toISOString() + ' - ' + entry + '\n');
-};
+app.get('/', (request, response) => {
+        response.sendFile(path.join(__dirname, '/index.html'));
+})
+// what an example endpoint looks like for GET requests
+app.get('/getEntries', (request, response) => {
 
-var server = http.createServer(function (req, res) {
-    if (req.method === 'POST') {
-        var body = '';
+    /* have to use a callback here -> JavaScript is 
+     asynchronous and you can't just say result = getTableEntries() 
+     in an asynchronous operation 
+     You still have to set up to read the input parameters. I don't 
+     really mind if it's a GET or POST request, it's up to you. 
+     
+     */
+    getTableEntries('name', 'phone', function(result) { 
+        console.log(result);
+        response.json(result)
+    }) 
+})
 
-        req.on('data', function(chunk) {
-            body += chunk;
-        });
-
-        req.on('end', function() {
-            if (req.url === '/') {
-                log('Received message: ' + body);
-            } else if (req.url = '/scheduled') {
-                log('Received task ' + req.headers['x-aws-sqsd-taskname'] + ' scheduled at ' + req.headers['x-aws-sqsd-scheduled-at']);
-            }
-
-            res.writeHead(200, 'OK', {'Content-Type': 'text/plain'});
-            res.end();
-        });
-    } else {
-        res.writeHead(200);
-        res.write(html);
-        res.end();
-    }
-});
-
-const { get } = require('https');
-var mysql = require('mysql');
+// set the app to listen on the right port
+const PORT = 3000
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`)
+})
 
 connection = mysql.createConnection( {
     host: "ec2-54-152-168-195.compute-1.amazonaws.com",
@@ -41,7 +34,6 @@ connection = mysql.createConnection( {
     user: "root",
     password: "adminStuff",
     database: "myDB"
-
 });
 
 connection.connect(function (err) {
@@ -49,16 +41,16 @@ connection.connect(function (err) {
     console.log("Connected!");
 });
 
-function getTableEntries(name, phone) {
+// have to have this callback parameter because of the 
+// asynchronous operation
+function getTableEntries(name, phone, callback) {
+    console.log(name, phone)
     connection.query("SELECT * FROM assign4", function (err, result) {
-        if (err) throw err;
-        console.log(result)
+        callback(result)
+    }, err => {
+        result = "ERROR OCCURRED";
+        callback(result)
     });
-
-    /*connection.query(`SELECT * FROM entries WHERE name = '${name}' AND 'Phone Number = '${phone}'`, function (err, result) {
-        if (err) throw err;
-        console.log(result)
-    });*/
 
 }
 
@@ -76,21 +68,4 @@ function removeReservation(name, phone) {
         if (err) throw err;
         console.log(result);
     })
-
-    /*var sql = `DELETE FROM reservations WHERE name = '${name}' AND 'Phone Number' = '${phone}'`;
-    connection.query(sql, function (err, result) {
-        if (err) throw err;
-        console.log(result);
-    })*/
 }
-
-getTableEntries();
-//insertNewEntry();
-removeReservation();
-getTableEntries();
-
-// Listen on port 3000, IP defaults to 127.0.0.1
-server.listen(port);
-
-// Put a friendly message on the terminal
-console.log('Server running at http://127.0.0.1:' + port + '/');

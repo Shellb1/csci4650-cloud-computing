@@ -47,6 +47,19 @@
       var name = document.getElementById("name").value
       var phoneNumber = document.getElementById("phoneNumber").value
       console.log(name, phoneNumber);
+      fetch("/getEntries")
+        .then(response => {
+          // indicates whether the response is successful (status code 200-299) or not
+          if (!response.ok) {
+            throw new Error(`Request failed with status ${reponse.status}`)
+          }
+          return response.json()
+        })
+        .then(data => {
+          console.log(data.count)
+          console.log(data.products)
+        })
+        .catch(error => console.log(error))
     }
 
     function createReservation() {
@@ -57,9 +70,9 @@
       var time = document.getElementById("time").value
       console.log(name, phoneNumber, numberOfGuests, date, time)
     }
-    
+
   </script>
-  
+
   <br><br>
   <button onclick='getTableEntries()'>TEST</button>
 </body>
