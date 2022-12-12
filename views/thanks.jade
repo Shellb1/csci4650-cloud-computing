@@ -1,7 +1,9 @@
 html
     head 
     body 
-        h1 Thank you for reserving a time with us!
-        h2 Click here to make another reservation or look at other reservations you might have made 
-        button(onclick = "window.location.href = '/'") Home
+        h1 Thank you, #{name}, for reserving a time with us at #{time} on #{date} for #{guests} people!
+        h2 Click here to view other reservations you have made 
+        button(onclick = "window.location.href = '/getEntries?name=#{name}&phoneNumber=#{phone}'") Other Reservations
+        h2 Click here to make another reservation
+        button(onclick = "window.location.href = '/'") Home Page
         

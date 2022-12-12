@@ -12,9 +12,9 @@
   </h2>
   <form>
     <label for="name">Name:</label><br />
-    <input type="text" id="name" name="name"><br>
+    <input type="text" id="name" name="name" required><br>
     <label for="name">Phone Number:</label><br />
-    <input type="text" id="phoneNumber" name="phoneNumber"><br>
+    <input type="text" id="phoneNumber" name="phoneNumber" required><br>
     <button id="submit" type="button" onclick="submitInfo()">Submit</button>
   </form>
 
@@ -27,15 +27,15 @@
   </h2>
   <form>
     <label for="resName">Name:</label><br />
-    <input type="text" id="resName" name="resName"><br>
+    <input type="text" id="resName" name="resName" required><br>
     <label for="resPhoneNumber">Phone Number:</label><br />
-    <input type="text" id="resPhoneNumber" name="resPhoneNumber"><br>
+    <input type="text" id="resPhoneNumber" name="resPhoneNumber" required><br>
     <label for="date">Date</label><br />
-    <input type="date" id="date" name="date"><br>
+    <input type="date" id="date" name="date" required><br>
     <label for="time">Time:</label><br />
-    <input type="time" id="time" name="time"><br>
+    <input type="time" id="time" name="time" required><br>
     <label for="guests">Number of Guests:</label><br />
-    <input type="number" id="guests" name="guests"><br>
+    <input type="number" id="guests" name="guests" required><br>
 
     <button id="submit" type="button" onclick="createReservation()">Submit</button>
   </form>
@@ -87,14 +87,13 @@
       });
 
     console.log(name, phoneNumber, numberOfGuests, date, time);
+    window.location.href = '/insertNewEntry';
     }
 
     
 
   </script>
 
-  <br><br>
-  <button onclick='getTableEntries()'>TEST</button>
 </body>
 
 </html>

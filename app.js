@@ -2,12 +2,18 @@ const express = require('express');
 const app = express();
 app.use(require('body-parser').urlencoded({ extended: false }));
 app.use(express.json());
-app.set("view engine","jade");
+app.set("view engine", "jade");
 const mysql = require('mysql');
 const path = require('path');
 
+var resName;
+var resPhone;
+var resDate;
+var resTime;
+var resGuests;
+
 app.get('/', (request, response) => {
-        response.sendFile(path.join(__dirname, '/index.html'));
+    response.sendFile(path.join(__dirname, '/index.html'));
 })
 
 
@@ -17,40 +23,65 @@ app.get('/getEntries', (request, response) => {
     const name = values['name'];
     const phone = values['phoneNumber']
 
-    getTableEntries(name, phone, function(result) { 
+    getTableEntries(name, phone, function (result) {
         console.log(result);
-        response.render('existing', {returnedEntries: result, name: name})
-    }) 
+        if (result.length == 0) {
+            response.render("no_existing", { name: name })
+        } else {
+            response.render('existing', { returnedEntries: result, name: name, phone: phone })
+        }
+    })
 })
 
 app.get('/getAllEntries', (request, response) => {
 
     // USED FOR TESTING 
 
-    getAllTableEntries(function(result) { 
+    getAllTableEntries(function (result) {
         console.log(result);
-        response.render('existing_all', {returnedEntries: result})
-    }) 
+        response.render('existing_all', { returnedEntries: result })
+    })
 })
+
+app.get('/deletePage', (request, response) => {
+    response.sendFile(path.join(__dirname, '/delete.html'));
+})
+
+app.post('/deleteEntry', (request, response) => {
+
+    const values = request.body;
+
+    const resName = values['resName'];
+    const resPhone = values['resPhoneNumber'];
+    const resDate = values['date'];
+    const resTime = values['time'];
+
+    deleteEntry(resName, resPhone, resDate, resTime, function (result) {
+        console.log(values);
+        console.log(result);
+    });
+
+}) 
 
 app.post('/insertNewEntry', (request, response) => {
 
     const values = request.body;
 
-    const resName = values['resName'];
-    const resPhone = values['resName'];
-    const resDate = values['resName'];
-    const resTime = values['resName'];
-    const resGuests = values['resName'];
+    resName = values['resName'];
+    resPhone = values['resPhoneNumber'];
+    resDate = values['date'];
+    resTime = values['time'];
+    resGuests = values['guests'];
 
-     insertNewEntry(resName, resPhone, resDate, resTime, resGuests, function(result) { 
+    insertNewEntry(resName, resPhone, resDate, resTime, resGuests, function (result) {
         console.log(values);
-        console.log(result); 
-    }); 
+        console.log(result);
+    });
+    response.send()
 })
 
 app.get('/insertNewEntry', (request, response) => {
-    response.render('thanks')
+    response.render('thanks', { name: resName, phone: resPhone, date: resDate, time: resTime, guests: resGuests })
 })
 
 // set the app to listen on the right port
@@ -59,7 +90,7 @@ app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
 
-connection = mysql.createConnection( {
+connection = mysql.createConnection({
     host: "ec2-54-152-168-195.compute-1.amazonaws.com",
     port: "3306",
     user: "root",
@@ -97,19 +128,26 @@ function getAllTableEntries(callback) {
 }
 
 function insertNewEntry(name, phone, date, time, guests, callback) {
-    var sql = `INSERT INTO entries VALUES ('${name}', '${phone}', '${date}', '${time}', '${guests}')`;
+    var sql = `INSERT INTO entries VALUES ('${name}', '${phone}', '${date}', '${time}', ${guests})`;
+    console.log(sql)
+    //var sql = `INSERT INTO entries VALUES ('test', 'test', 'test', 'test', 10)`;
     connection.query(sql, function (err, result) {
         callback(result);
-    }, err=> {
+    }, err => {
         result = "ERROR OCCURRED";
+        console.log(err)
         callback(result);
     })
 }
 
-function removeReservation(name, phone) {
-    var sql = "DELETE FROM assign4 WHERE Title IS NULL";
+function deleteEntry(name, phone, date, time, callback) {
+    var sql = `DELETE FROM entries WHERE name = '${name}' AND phone = '${phone}' AND date = '${date}' AND time = '${time}'`;
+    console.log(sql)
     connection.query(sql, function (err, result) {
-        if (err) throw err;
-        console.log(result);
+        callback(result);
+    }, err => {
+        result = "ERROR OCCURRED";
+        console.log(err)
+        callback(result);
     })
 }
