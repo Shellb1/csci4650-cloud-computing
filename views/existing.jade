@@ -1,0 +1,23 @@
+html
+    head 
+        style(type='text/css') table, th, td {border:1px solid black;} table {width:100%;} 
+    body
+        h1 Here are the reservations we have for you, #{name}!
+        div
+            table 
+                thead 
+                    tr
+                        th Phone
+                        th Date
+                        th Time
+                        th Guests
+                tbody
+                    each entry, i in returnedEntries
+                        tr
+                            td #{entry.phone}
+                            td #{entry.date}
+                            td #{entry.time} 
+                            td #{entry.guests} 
+                        tr
+        h2 Click here to make another reservation
+        button(onclick="window.location.href = '/'") Home

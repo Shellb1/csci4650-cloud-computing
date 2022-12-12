@@ -1,25 +1,56 @@
 const express = require('express');
 const app = express();
+app.use(require('body-parser').urlencoded({ extended: false }));
+app.use(express.json());
+app.set("view engine","jade");
 const mysql = require('mysql');
 const path = require('path');
 
 app.get('/', (request, response) => {
         response.sendFile(path.join(__dirname, '/index.html'));
 })
-// what an example endpoint looks like for GET requests
+
+
 app.get('/getEntries', (request, response) => {
 
-    /* have to use a callback here -> JavaScript is 
-     asynchronous and you can't just say result = getTableEntries() 
-     in an asynchronous operation 
-     You still have to set up to read the input parameters. I don't 
-     really mind if it's a GET or POST request, it's up to you. 
-     
-     */
-    getTableEntries('name', 'phone', function(result) { 
+    const values = request.query;
+    const name = values['name'];
+    const phone = values['phoneNumber']
+
+    getTableEntries(name, phone, function(result) { 
         console.log(result);
-        response.json(result)
+        response.render('existing', {returnedEntries: result, name: name})
     }) 
+})
+
+app.get('/getAllEntries', (request, response) => {
+
+    // USED FOR TESTING 
+
+    getAllTableEntries(function(result) { 
+        console.log(result);
+        response.render('existing_all', {returnedEntries: result})
+    }) 
+})
+
+app.post('/insertNewEntry', (request, response) => {
+
+    const values = request.body;
+
+    const resName = values['resName'];
+    const resPhone = values['resName'];
+    const resDate = values['resName'];
+    const resTime = values['resName'];
+    const resGuests = values['resName'];
+
+     insertNewEntry(resName, resPhone, resDate, resTime, resGuests, function(result) { 
+        console.log(values);
+        console.log(result); 
+    }); 
+})
+
+app.get('/insertNewEntry', (request, response) => {
+    response.render('thanks')
 })
 
 // set the app to listen on the right port
@@ -45,7 +76,8 @@ connection.connect(function (err) {
 // asynchronous operation
 function getTableEntries(name, phone, callback) {
     console.log(name, phone)
-    connection.query("SELECT * FROM assign4", function (err, result) {
+    //connection.query(`SELECT * FROM entries WHERE name = '${name}' AND phone = '${phone}'`, function (err, result) {
+    connection.query(`SELECT * FROM entries WHERE name = '${name}' AND  phone = '${phone}'`, function (err, result) {
         callback(result)
     }, err => {
         result = "ERROR OCCURRED";
@@ -54,11 +86,23 @@ function getTableEntries(name, phone, callback) {
 
 }
 
-function insertNewEntry() {
-    var sql = "INSERT INTO assign4 VALUES ('TESTING', 'NOPE', 'YUP', '123', 'ANOTHER')";
+function getAllTableEntries(callback) {
+    connection.query(`SELECT * FROM entries`, function (err, result) {
+        callback(result)
+    }, err => {
+        result = "ERROR OCCURRED";
+        callback(result)
+    });
+
+}
+
+function insertNewEntry(name, phone, date, time, guests, callback) {
+    var sql = `INSERT INTO entries VALUES ('${name}', '${phone}', '${date}', '${time}', '${guests}')`;
     connection.query(sql, function (err, result) {
-        if (err) throw err;
-        console.log(result);
+        callback(result);
+    }, err=> {
+        result = "ERROR OCCURRED";
+        callback(result);
     })
 }
 

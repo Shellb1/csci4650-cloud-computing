@@ -2,7 +2,6 @@
 <html>
 
 <head>
-  <script type="text/javascript" src="app.js"></script>
   <title>Cloud Computing Final Project</title>
 </head>
 
@@ -47,7 +46,8 @@
       var name = document.getElementById("name").value
       var phoneNumber = document.getElementById("phoneNumber").value
       console.log(name, phoneNumber);
-      fetch("/getEntries")
+      var url = `/getEntries?name=${name}&phoneNumber=${phoneNumber}`;
+      fetch(url)
         .then(response => {
           // indicates whether the response is successful (status code 200-299) or not
           if (!response.ok) {
@@ -60,6 +60,8 @@
           console.log(data.products)
         })
         .catch(error => console.log(error))
+
+      window.location = url;
     }
 
     function createReservation() {
@@ -68,8 +70,26 @@
       var numberOfGuests = document.getElementById("guests").value
       var date = document.getElementById("date").value
       var time = document.getElementById("time").value
-      console.log(name, phoneNumber, numberOfGuests, date, time)
+
+      fetch('/insertNewEntry', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: `{
+            "resName": "${name}",
+            "resPhoneNumber": "${phoneNumber}",
+            "date": "${date}",
+            "time": "${time}",
+            "guests": ${numberOfGuests} 
+              }`,
+      });
+
+    console.log(name, phoneNumber, numberOfGuests, date, time);
     }
+
+    
 
   </script>
 
